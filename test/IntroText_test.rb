@@ -8,7 +8,15 @@ class IntroTextTest < Minitest::Test
   end
 
   def test_it_can_be_configured
-    assert true
+    test_class = 'testing-class'
+    test_type = 'div'
+    processor = TextProcessor.new(wrap_class: test_class, wrap_type: test_type)
+    test_fragment = html_fragment
+    processor.style_first_n_words(test_fragment, 5)
+
+    assert test_fragment.children[0].children[0].inner_text == 'Lorem ipsum dolor sit amet, '
+    assert test_fragment.children[0].children[0].attr('class') == test_class
+    assert test_fragment.children[0].children[0].name == test_type
   end
 
   def test_it_wraps_the_first_n_words
@@ -26,7 +34,6 @@ class IntroTextTest < Minitest::Test
     test_fragment = html_fragment
     processor.style_first_n_words(test_fragment, 3)
     assert test_fragment.children[0].children[0].inner_text == "Lorem ipsum dolor "
-    puts test_fragment
 
     test_fragment = html_fragment
     processor.style_first_n_words(test_fragment, 0)
