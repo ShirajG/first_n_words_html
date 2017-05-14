@@ -1,3 +1,5 @@
+require 'pry'
+
 module IntroText
   class TextProcessor
     attr_accessor :wrap_class, :wrap_type
@@ -5,6 +7,8 @@ module IntroText
     def initialize(options = {})
       @wrap_class = options.fetch(:wrap_class, '')
       @wrap_type = options.fetch(:wrap_type, 'span')
+      @selector_type = options.fetch(:selector_type, 'css')
+      @selector = options.fetch(:selector, 'p')
     end
 
     def wrap_content child_node, word_count
@@ -24,7 +28,7 @@ module IntroText
         # If a period appears, stop styling any further.
         # Only exception is if styling link text, the whole link should be styled.
         if word[-1] == '.'
-          unless ( tag_exceptions & child_node.ancestors.map(&:name)).any? ||
+          unless (tag_exceptions & child_node.ancestors.map(&:name)).any? ||
                  early_end_exceptions.include?(word.sub(/"|'|“/,'').strip.downcase)
               word_count = 0
           end
@@ -32,7 +36,9 @@ module IntroText
       end
 
       child_node.content = words
-      child_node.before(Nokogiri::HTML.fragment("#{section_start_tag(words_to_wrap)}"))
+      if(words_to_wrap != "")
+        child_node.before(Nokogiri::HTML.fragment("#{section_start_tag(words_to_wrap)}"))
+      end
       # Return word count because we need to keep track of it in further loops.
       word_count
     end
@@ -53,13 +59,22 @@ module IntroText
       return word_count
     end
 
-    def style_first_n_words(graf, word_count, options = {})
-      graf.children.each do |child_node|
+    def select_nodes(fragment)
+      if @selector_type = 'xpath'
+        fragment.xpath(@selector)
+      else
+        fragment.at_css(@selector)
+      end
+    end
+
+    def style_first_n_words(fragment, word_count)
+      select_nodes(fragment).children.each do |child_node|
         if word_count <= 0
-          if child_node.name == 'text' && early_end_characters.include?(child_node.text[0])
+          last_character = child_node.text[0]
+          if child_node.name == 'text' && early_end_characters.include?(last_character)
             # Fine tuning tweak, always style certain trailing punctuations, even if we hit the word count
             child_node.content = child_node.text[1..-1]
-            child_node.before(Nokogiri::HTML.fragment("#{section_start_tag(',')}"))
+            child_node.before(Nokogiri::HTML.fragment("#{section_start_tag(last_character)}"))
           end
           break
         end
@@ -68,7 +83,7 @@ module IntroText
           # Links, Italics, and Bold are a special case, we don't want them getting partially styled.
           # We extend the word count by whatever the overflow would be.
           if tag_exceptions.include?(child_node.name)
-            if word_count - child_node.text.split(' ').length < 0
+            if word_count - child_node.text.split(' ').length <= 0
               # Subtracting a negative number here.
               word_count -= word_count - child_node.text.split(' ').length
             end
@@ -106,7 +121,7 @@ module IntroText
     end
 
     def tag_exceptions
-      ['a', 'em', 'strong']
+      ['a']
     end
 
     def early_end_characters
