@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = "A gem to help style the first n words of HTML content"
   spec.description   = "A gem to help style the first n words of HTML content"
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.homepage      = "https://github.com/ShirajG/first_n_words_html"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
