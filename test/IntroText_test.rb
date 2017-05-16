@@ -44,4 +44,14 @@ class IntroTextTest < Minitest::Test
     assert test_fragment.children[0].children[0].children[0].name == 'span'
     assert test_fragment.children[0].children[0].children[0].inner_text.split(' ').length == 5
   end
+
+  def test_adjacent_tags
+    test_fragment = nested_adjacent_html_fragment
+    processor = get_text_processor(wrap_class: 'testing')
+    processor.style_first_n_words(test_fragment, 6)
+    puts test_fragment
+    assert test_fragment.children[0].children[0].name == 'a'
+    assert test_fragment.children[0].children[0].children[0].name == 'span'
+    assert test_fragment.children[0].children[0].children[0].inner_text.split(' ').length == 1
+  end
 end
