@@ -60,7 +60,7 @@ module IntroText
     end
 
     def select_nodes(fragment)
-      if @selector_type = 'xpath'
+      if @selector_type == 'xpath'
         fragment.xpath(@selector)
       else
         fragment.at_css(@selector)
