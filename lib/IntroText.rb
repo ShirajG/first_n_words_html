@@ -2,7 +2,7 @@ require 'pry'
 
 module IntroText
   class TextProcessor
-    attr_accessor :wrap_class, :wrap_type
+    attr_reader :wrap_class, :wrap_type, :selector_type, :selector
 
     def initialize(options = {})
       @wrap_class = options.fetch(:wrap_class, '')
